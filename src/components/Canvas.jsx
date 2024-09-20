@@ -10,20 +10,35 @@ const Canvas = () => {
   const [{ isOver }, drop] = useDrop({
     accept: 'SHAPE',
     drop: (item, monitor) => {
-      const offset = monitor.getSourceClientOffset(); // Position where the item is dropped
-      addShape(item.shapeType, offset);                // Adds the shape to the canvas
+      const clientOffset = monitor.getClientOffset();
+      const stage = document.getElementById('canvas-stage');
+      const stageRect = stage.getBoundingClientRect();
+
+      const x = clientOffset.x - stageRect.left;
+      const y = clientOffset.y - stageRect.top;
+
+      const newShape = {
+        id: Date.now(),
+        type: item.shapeType,
+        x: x,
+        y: y,
+        width: 100,
+        height: 100,
+      };
+
+      // Adjust points for specific shapes
+      if (item.shapeType === 'line' || item.shapeType === 'arrow') {
+        newShape.points = [0, 0, 100, 0]; // Horizontal line or arrow
+      } else if (item.shapeType === 'triangle') {
+        newShape.points = [0, 100, 50, 0, 100, 100]; // Triangle points
+      }
+
+      setShapes((prevShapes) => [...prevShapes, newShape]);
     },
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
   });
-
-  const addShape = (shapeType, offset) => {
-    setShapes((prevShapes) => [
-      ...prevShapes,
-      { id: Date.now(), type: shapeType, x: offset.x, y: offset.y, width: 100, height: 100 },
-    ]);
-  };
 
   const updateShape = (updatedShape) => {
     setShapes((prevShapes) =>
@@ -33,44 +48,23 @@ const Canvas = () => {
 
   const handleStageClick = (e) => {
     if (e.target === e.target.getStage()) {
-      setSelectedShapeId(null); // Deselect when clicking outside
+      setSelectedShapeId(null);
     }
   };
 
-  const handleWheel = (e) => {
-    e.evt.preventDefault();
-
-    const scaleBy = 1.05;
-    const stage = e.target.getStage();
-    const oldScale = stage.scaleX();
-    const pointer = stage.getPointerPosition();
-
-    const mousePointTo = {
-      x: (pointer.x - stage.x()) / oldScale,
-      y: (pointer.y - stage.y()) / oldScale,
-    };
-
-    const newScale = e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-    stage.scale({ x: newScale, y: newScale });
-
-    const newPos = {
-      x: pointer.x - mousePointTo.x * newScale,
-      y: pointer.y - mousePointTo.y * newScale,
-    };
-    stage.position(newPos);
-    stage.batchDraw();
-  };
-
   return (
-    <div ref={drop} className="flex-grow relative"
+    <div
+      ref={drop}
+      className="relative w-screen h-screen"
       style={{
+        background: 'white',
+        overflow: 'hidden',
         backgroundImage: `linear-gradient(90deg, rgba(0, 0, 0, 0.1) 1px, transparent 1px),
                           linear-gradient(rgba(0, 0, 0, 0.1) 1px, transparent 1px)`,
-        backgroundSize: '20px 20px',  // You can adjust the grid size here
-        backgroundPosition: '0 0',
+        backgroundSize: '30px 30px',
       }}
     >
-      <Stage width={window.innerWidth} height={window.innerHeight} onClick={handleStageClick} onWheel={handleWheel}>
+      <Stage id="canvas-stage" width={window.innerWidth} height={window.innerHeight} onClick={handleStageClick}>
         <Layer>
           {shapes.map((shape) => (
             <KonvaShape

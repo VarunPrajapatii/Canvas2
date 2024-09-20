@@ -19,3 +19,4 @@ const DraggableShape = ({ shapeType, icon: Icon }) => {
 };
 
 export default DraggableShape;
+  

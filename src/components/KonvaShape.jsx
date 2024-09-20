@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { useRef, useEffect } from 'react';
 import { Rect, Circle, Line, Transformer, Arrow } from 'react-konva';
 
@@ -21,11 +22,10 @@ const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
     onUpdateShape(newShape);
   };
 
-  const handleTransformEnd = (e) => {
+  const handleTransformEnd = () => {
     const node = shapeRef.current;
     const scaleX = node.scaleX();
     const scaleY = node.scaleY();
-
     node.scaleX(1);
     node.scaleY(1);
 
@@ -36,6 +36,17 @@ const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
       width: node.width() * scaleX,
       height: node.height() * scaleY,
     };
+
+    if (shape.type === 'line' || shape.type === 'arrow') {
+      newShape.points = [0, 0, newShape.width, 0]; // Maintain horizontal line/arrow
+    } else if (shape.type === 'triangle') {
+      newShape.points = [
+        0, newShape.height,
+        newShape.width / 2, 0,
+        newShape.width, newShape.height,
+      ];
+    }
+
     onUpdateShape(newShape);
   };
 
@@ -70,7 +81,11 @@ const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
         return (
           <Line
             ref={shapeRef}
-            points={[0, 100, 50, 0, 100, 100]}
+            points={[
+              shape.x, shape.y + shape.height, // Bottom left
+              shape.x + shape.width / 2, shape.y, // Top middle
+              shape.x + shape.width, shape.y + shape.height, // Bottom right
+            ]}
             closed
             stroke="black"
             fill="yellow"
@@ -84,7 +99,7 @@ const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
         return (
           <Line
             ref={shapeRef}
-            points={[0, 0, 100, 0]}
+            points={shape.points}
             stroke="black"
             draggable
             onClick={onSelect}
@@ -96,11 +111,11 @@ const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
         return (
           <Arrow
             ref={shapeRef}
-            points={[0, 0, 100, 0]}
+            points={shape.points}
             stroke="black"
+            draggable
             pointerLength={10}
             pointerWidth={10}
-            draggable
             onClick={onSelect}
             onDragEnd={handleDragEnd}
             onTransformEnd={handleTransformEnd}

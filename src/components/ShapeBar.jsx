@@ -13,7 +13,7 @@ const shapes = [
 const ShapeBar = () => {
   return (
     <div
-      className="fixed top-4 left-4 w-24 bg-white p-4 rounded-lg shadow-lg space-y-4 border border-gray-300"
+      className="fixed top-36 left-4  bg-gray-200 p-3 rounded-lg shadow-lg space-y-6 border border-gray-400"
       style={{ zIndex: 10 }}
     >
       {shapes.map((shape) => (
