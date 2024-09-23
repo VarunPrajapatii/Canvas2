@@ -11,9 +11,13 @@ const Canvas = () => {
     accept: 'SHAPE',
     drop: (item, monitor) => {
       const clientOffset = monitor.getClientOffset();
+      // monitor.getClientOffset() retrieves the current mouse position (or the position of the dragged item) in the viewport. 
+      // This returns an object with properties x and y, representing the mouse coordinates relative to the entire browser window.
       const stage = document.getElementById('canvas-stage');
       const stageRect = stage.getBoundingClientRect();
-
+      // getBoundingClientRect() returns a DOMRect object containing the size of the element and its position relative to the viewport. 
+      // This includes properties like top, left, width, and height.
+      // The top and left properties are particularly important here, as they tell us the distance from the top-left corner of the viewport to the top-left corner of the canvas-stage
       const x = clientOffset.x - stageRect.left;
       const y = clientOffset.y - stageRect.top;
 
@@ -28,10 +32,11 @@ const Canvas = () => {
 
       // Adjust points for specific shapes
       if (item.shapeType === 'line' || item.shapeType === 'arrow') {
-        newShape.points = [0, 0, 100, 0]; // Horizontal line or arrow
-      } else if (item.shapeType === 'triangle') {
-        newShape.points = [0, 100, 50, 0, 100, 100]; // Triangle points
-      }
+        newShape.points = [x, y, x + 200, y]; // Horizontal line or arrow
+      } 
+      // else if (item.shapeType === 'triangle') {
+      //   newShape.points = [0, 200, 200, 200, 100, 100]; // Triangle points
+      // }
 
       setShapes((prevShapes) => [...prevShapes, newShape]);
     },

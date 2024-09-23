@@ -1,5 +1,5 @@
 import React from 'react';
-import ShapeItem from './DraggableShape';
+import DraggableShape from './DraggableShape';
 import { Square, Circle, Triangle, Minus, ArrowRight } from 'lucide-react';
 
 const shapes = [
@@ -17,7 +17,7 @@ const ShapeBar = () => {
       style={{ zIndex: 10 }}
     >
       {shapes.map((shape) => (
-        <ShapeItem key={shape.shapeType} shapeType={shape.shapeType} icon={shape.icon} />
+        <DraggableShape key={shape.shapeType} shapeType={shape.shapeType} icon={shape.icon} />
       ))}
     </div>
   );
