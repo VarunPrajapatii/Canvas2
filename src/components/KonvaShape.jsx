@@ -1,155 +1,70 @@
 /* eslint-disable react/prop-types */
-import React, { useRef, useEffect } from "react";
-import {
-  Rect,
-  Circle,
-  Line,
-  Transformer,
-  Arrow,
-  Ellipse,
-  Path,
-} from "react-konva";
+import { useRef, useEffect } from "react";
+import { Rect, Line, Transformer, Arrow, Ellipse, Path } from "react-konva";
 
 const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
   const shapeRef = useRef();
   const trRef = useRef();
-  // console.log(shapeRef);
-  // console.log(trRef);
 
   useEffect(() => {
     if (isSelected) {
       trRef.current.nodes([shapeRef.current]);
       trRef.current.getLayer().batchDraw();
     }
-    console.log("second shape.x/y", shape.x, shape.y);
   }, [isSelected]);
 
   const handleDragEnd = (e) => {
-    console.log(e.target.x(), e.target.y(), "this one");
-    console.log("in drag", shape.x, shape.y);
-
     const newShape = {
       ...shape,
       x: e.target.x(),
       y: e.target.y(),
     };
     onUpdateShape(newShape);
-    // console.log(e.target.x(), e.target.y());
+    console.log(shape.x, shape.y);
+
   };
 
-  // const handleTransformEnd = () => {
-  //   const node = shapeRef.current;
-  //   const scaleX = node.scaleX();
-  //   const scaleY = node.scaleY();`
-
-  //   // Get the original position
-  //   const originalX = node.x();
-  //   const originalY = node.y();
-
-  //   // Get the original dimensions before scaling
-  //   const originalWidth = shape.width;
-  //   const originalHeight = shape.height;
-
-  //   // Reset the scale back to 1 (to prevent compounding scaling)
-  //   node.scaleX(1);
-  //   node.scaleY(1);
-
-  //   // Create a new shape object
-  //   const newShape = {
-  //     ...shape,
-  //     x: originalX, // Keep the original x
-  //     y: originalY, // Keep the original y
-  //     width: originalWidth * scaleX, // Adjust width based on scaleX
-  //     height: originalHeight * scaleY, // Adjust height based on scaleY
-  //   };
-
-  //   // Update points based on shape type
-  //   if (shape.type === "line" || shape.type === "arrow") {
-  //     // Lines and arrows need to update their points
-  //     const newPoints = shape.points.map((point, index) =>
-  //       index % 2 === 0 ? point * scaleX : point * scaleY
-  //     );
-  //     newShape.points = newPoints;
-  //   } else if (shape.type === "triangle") {
-  //     // Triangles need to recalculate their points
-  //     const halfWidth = newShape.width / 2;
-  //     const halfHeight = newShape.height / 2;
-
-  //     // Maintain the center point of the triangle and recalculate the points
-  //     newShape.points = [
-  //       originalX - halfWidth, originalY + halfHeight, // Bottom left
-  //       originalX, originalY - halfHeight, // Top middle
-  //       originalX + halfWidth, originalY + halfHeight, // Bottom right
-  //     ];
-  //   } else if (shape.type === "diamond") {
-  //     // Define the points for a diamond shape
-  //     const halfWidth = newShape.width / 2;
-  //     const halfHeight = newShape.height / 2;
-  //     newShape.points = [
-  //       newShape.x + halfWidth,
-  //       newShape.y, // Top middle
-  //       newShape.x + newShape.width,
-  //       newShape.y + halfHeight, // Right middle
-  //       newShape.x + halfWidth,
-  //       newShape.y + newShape.height, // Bottom middle
-  //       newShape.x,
-  //       newShape.y + halfHeight, // Left middle
-  //     ];
-  //   }
-
-  //   onUpdateShape(newShape);
-  // };
-
   const handleTransformEnd = () => {
-    console.log("in transform", shape.x, shape.y);
+    console.log(shape.x, shape.y);
 
     const node = shapeRef.current;
     const scaleX = node.scaleX();
     const scaleY = node.scaleY();
-
-    // Get the original position (center point)
     const originalX = node.x();
     const originalY = node.y();
     const originalWidth = shape.width;
     const originalHeight = shape.height;
-
-    console.log(
-      "originalX",
-      originalX,
-      "originalY",
-      originalY,
-      "originalWidth",
-      originalWidth,
-      "originalHeight",
-      originalHeight
-    );
-
-    // Reset the scale back to 1 (to prevent compounding scaling)
+  
+    // Reset the scale to prevent compounding scaling issues
     node.scaleX(1);
     node.scaleY(1);
-
-    // Create a new shape object
+  
     const newShape = {
       ...shape,
-      x: originalX, // Keep the original x
-      y: originalY, // Keep the original y
-      width: originalWidth * scaleX, // Adjust width based on scaleX
-      height: originalHeight * scaleY, // Adjust height based on scaleY
+      x: originalX,  // Keep the same position
+      y: originalY,  // Keep the same position
+      width: originalWidth * scaleX, // Adjust width based on scale
+      height: originalHeight * scaleY, // Adjust height based on scale
     };
+  
+    // Adjust diamond shape resizing behavior
+    if (shape.type === "diamond") {
+      // Scale the diamond by adjusting width and height after reset
+    newShape.width = originalWidth * scaleX;
+    newShape.height = originalHeight * scaleY;
 
-    // Update points specifically for the triangle
-    if (shape.type === "line" || shape.type === "arrow") {
-      // Lines and arrows need to update their points
+    // Update the path data or scaling based on width/height
+    node.setAttr('scaleX', scaleX);
+    node.setAttr('scaleY', scaleY);
+    } else if (shape.type === "line" || shape.type === "arrow") {
       const newPoints = shape.points.map((point, index) =>
         index % 2 === 0 ? point * scaleX : point * scaleY
       );
       newShape.points = newPoints;
     } else if (shape.type === "triangle") {
-      // Maintain the center point of the triangle and recalculate the points
       const halfWidth = newShape.width / 2;
       const halfHeight = newShape.height / 2;
-
-      // Triangle points based on center (originalX, originalY)
+  
       newShape.points = [
         originalX - halfWidth,
         originalY + halfHeight, // Bottom left
@@ -159,13 +74,14 @@ const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
         originalY + halfHeight, // Bottom right
       ];
     }
+    console.log(shape.x, shape.y);
 
+  
     onUpdateShape(newShape);
   };
+  
 
   const renderShape = () => {
-    // console.log(shape);
-
     switch (shape.type) {
       case "rect":
         return (
@@ -240,8 +156,10 @@ const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
             data="M 50,0 L 100,50 L 50,100 L 0,50 Z" // Example diamond path
             x={shape.x}
             y={shape.y}
-            scaleX={shape.width / 100}
-            scaleY={shape.height / 100}
+            width={shape.width} // Apply updated width
+            height={shape.height} // Apply updated height
+            scaleX={1} // Reset scaleX after transformation
+            scaleY={1} // Reset scaleY after transformation
             fill="pink"
             stroke="purple"
             draggable
@@ -250,6 +168,7 @@ const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
             onTransformEnd={handleTransformEnd}
           />
         );
+
       default:
         return null;
     }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDrop } from 'react-dnd';
 import { Stage, Layer } from 'react-konva';
 import KonvaShape from './KonvaShape';
@@ -13,7 +13,6 @@ const Canvas = () => {
       const clientOffset = monitor.getClientOffset();
       const stage = document.getElementById('canvas-stage');
       const stageRect = stage.getBoundingClientRect();
-
       const x = clientOffset.x - stageRect.left;
       const y = clientOffset.y - stageRect.top;
 
@@ -25,26 +24,18 @@ const Canvas = () => {
         width: 100,
         height: 100,
       };
-      // setSelectedShapeId(newShape.id)
-      if(item.shapeType === 'triangle'){
-        // console.log(newShape.x, newShape.y, "triangles");
-      }
-
-      // Adjust points for specific shapes
       if (item.shapeType === 'line' || item.shapeType === 'arrow') {
         newShape.points = [x, y, x + 200, y]; // Horizontal line or arrow
       } else if (item.shapeType === 'triangle') {
-        // console.log("before points", newShape.x, newShape.y, newShape);
-        
         newShape.points = [
           x, y + 100, // Bottom left
           x + 50, y, // Top middle
           x + 100, y + 100, // Bottom right
         ];
-        
-        // console.log("after points", newShape.x, newShape.y, newShape);
       }
       setShapes((prevShapes) => [...prevShapes, newShape]);
+      console.log(newShape.x, newShape.y);
+      
     },
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
@@ -58,11 +49,6 @@ const Canvas = () => {
   };
 
   const handleStageClick = (e) => {
-    // console.log(e);
-    // console.log(e.target);
-    // console.log(e.target.getStage());
-
-    
     if (e.target === e.target.getStage()) {
       setSelectedShapeId(null);
     }
