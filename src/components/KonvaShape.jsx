@@ -1,137 +1,173 @@
 /* eslint-disable react/prop-types */
-import React, { useRef, useEffect } from 'react';
-import { Rect, Circle, Line, Transformer, Arrow } from 'react-konva';
+import React, { useRef, useEffect } from "react";
+import {
+  Rect,
+  Circle,
+  Line,
+  Transformer,
+  Arrow,
+  Ellipse,
+  Path,
+} from "react-konva";
 
 const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
   const shapeRef = useRef();
   const trRef = useRef();
+  // console.log(shapeRef);
+  // console.log(trRef);
 
   useEffect(() => {
     if (isSelected) {
       trRef.current.nodes([shapeRef.current]);
       trRef.current.getLayer().batchDraw();
     }
+    console.log("second shape.x/y", shape.x, shape.y);
   }, [isSelected]);
 
   const handleDragEnd = (e) => {
-    // console.log("x: ", e.target.x(), "  y: ", e.target.y())
-    // const newShape = {
-    //   ...shape,
-    //   x: e.target.x(),
-    //   y: e.target.y(),
-    // };
-    // console.log(newShape);
-    // if(newShape.type === "triangle"){
-    //   null
-    // }else{
-    //   onUpdateShape(newShape);
-    // }
-    
+    console.log(e.target.x(), e.target.y(), "this one");
+    console.log("in drag", shape.x, shape.y);
+
+    const newShape = {
+      ...shape,
+      x: e.target.x(),
+      y: e.target.y(),
+    };
+    onUpdateShape(newShape);
+    // console.log(e.target.x(), e.target.y());
   };
-  
+
   // const handleTransformEnd = () => {
   //   const node = shapeRef.current;
   //   const scaleX = node.scaleX();
-  //   const scaleY = node.scaleY();
+  //   const scaleY = node.scaleY();`
 
   //   // Get the original position
   //   const originalX = node.x();
   //   const originalY = node.y();
-    
-  //   // Get the original dimensions after scaling
-  //   const originalWidth = shape.width; // Use original width
-  //   const originalHeight = shape.height; // Use original height
 
-  //   // Reset scale back to 1
+  //   // Get the original dimensions before scaling
+  //   const originalWidth = shape.width;
+  //   const originalHeight = shape.height;
+
+  //   // Reset the scale back to 1 (to prevent compounding scaling)
   //   node.scaleX(1);
   //   node.scaleY(1);
 
   //   // Create a new shape object
   //   const newShape = {
-  //       ...shape,
-  //       x: shape.initialX !== undefined ? shape.initialX : originalX, // Keep original x for the first resize
-  //       y: shape.initialY !== undefined ? shape.initialY : originalY, // Keep original y for the first resize
-  //       width: originalWidth * scaleX, // Scale width
-  //       height: originalHeight * scaleY, // Scale height
+  //     ...shape,
+  //     x: originalX, // Keep the original x
+  //     y: originalY, // Keep the original y
+  //     width: originalWidth * scaleX, // Adjust width based on scaleX
+  //     height: originalHeight * scaleY, // Adjust height based on scaleY
   //   };
 
-  //   // Set the initial position if not already set
-  //   if (shape.initialX === undefined && shape.initialY === undefined) {
-  //       newShape.initialX = originalX;
-  //       newShape.initialY = originalY;
-  //   }
-    
   //   // Update points based on shape type
-  //   if (shape.type === 'line' || shape.type === 'arrow') {
-  //       newShape.points = [
-  //           newShape.x, newShape.y, // Start point remains fixed
-  //           newShape.x + newShape.width, newShape.y // End point adjusted
-  //       ];
+  //   if (shape.type === "line" || shape.type === "arrow") {
+  //     // Lines and arrows need to update their points
+  //     const newPoints = shape.points.map((point, index) =>
+  //       index % 2 === 0 ? point * scaleX : point * scaleY
+  //     );
+  //     newShape.points = newPoints;
+  //   } else if (shape.type === "triangle") {
+  //     // Triangles need to recalculate their points
+  //     const halfWidth = newShape.width / 2;
+  //     const halfHeight = newShape.height / 2;
 
-  //   } else if (shape.type === 'triangle') {
-  //       newShape.points = [
-  //           newShape.x, newShape.y + newShape.height, // Bottom left
-  //           newShape.x + newShape.width / 2, newShape.y, // Top middle
-  //           newShape.x + newShape.width, newShape.y + newShape.height, // Bottom right
-  //       ];
+  //     // Maintain the center point of the triangle and recalculate the points
+  //     newShape.points = [
+  //       originalX - halfWidth, originalY + halfHeight, // Bottom left
+  //       originalX, originalY - halfHeight, // Top middle
+  //       originalX + halfWidth, originalY + halfHeight, // Bottom right
+  //     ];
+  //   } else if (shape.type === "diamond") {
+  //     // Define the points for a diamond shape
+  //     const halfWidth = newShape.width / 2;
+  //     const halfHeight = newShape.height / 2;
+  //     newShape.points = [
+  //       newShape.x + halfWidth,
+  //       newShape.y, // Top middle
+  //       newShape.x + newShape.width,
+  //       newShape.y + halfHeight, // Right middle
+  //       newShape.x + halfWidth,
+  //       newShape.y + newShape.height, // Bottom middle
+  //       newShape.x,
+  //       newShape.y + halfHeight, // Left middle
+  //     ];
   //   }
+
   //   onUpdateShape(newShape);
   // };
 
   const handleTransformEnd = () => {
-  const node = shapeRef.current;
-  const scaleX = node.scaleX();
-  const scaleY = node.scaleY();
+    console.log("in transform", shape.x, shape.y);
 
-  // Get the original position
-  const originalX = node.x();
-  const originalY = node.y();
-  
-  // Get the original dimensions before scaling
-  const originalWidth = shape.width;
-  const originalHeight = shape.height;
+    const node = shapeRef.current;
+    const scaleX = node.scaleX();
+    const scaleY = node.scaleY();
 
-  // Reset the scale back to 1 (to prevent compounding scaling)
-  node.scaleX(1);
-  node.scaleY(1);
+    // Get the original position (center point)
+    const originalX = node.x();
+    const originalY = node.y();
+    const originalWidth = shape.width;
+    const originalHeight = shape.height;
 
-  // Create a new shape object
-  const newShape = {
-    ...shape,
-    x: originalX, // Keep the original x
-    y: originalY, // Keep the original y
-    width: originalWidth * scaleX, // Adjust width based on scaleX
-    height: originalHeight * scaleY, // Adjust height based on scaleY
+    console.log(
+      "originalX",
+      originalX,
+      "originalY",
+      originalY,
+      "originalWidth",
+      originalWidth,
+      "originalHeight",
+      originalHeight
+    );
+
+    // Reset the scale back to 1 (to prevent compounding scaling)
+    node.scaleX(1);
+    node.scaleY(1);
+
+    // Create a new shape object
+    const newShape = {
+      ...shape,
+      x: originalX, // Keep the original x
+      y: originalY, // Keep the original y
+      width: originalWidth * scaleX, // Adjust width based on scaleX
+      height: originalHeight * scaleY, // Adjust height based on scaleY
+    };
+
+    // Update points specifically for the triangle
+    if (shape.type === "line" || shape.type === "arrow") {
+      // Lines and arrows need to update their points
+      const newPoints = shape.points.map((point, index) =>
+        index % 2 === 0 ? point * scaleX : point * scaleY
+      );
+      newShape.points = newPoints;
+    } else if (shape.type === "triangle") {
+      // Maintain the center point of the triangle and recalculate the points
+      const halfWidth = newShape.width / 2;
+      const halfHeight = newShape.height / 2;
+
+      // Triangle points based on center (originalX, originalY)
+      newShape.points = [
+        originalX - halfWidth,
+        originalY + halfHeight, // Bottom left
+        originalX,
+        originalY - halfHeight, // Top middle
+        originalX + halfWidth,
+        originalY + halfHeight, // Bottom right
+      ];
+    }
+
+    onUpdateShape(newShape);
   };
 
-  // Update points based on shape type
-  if (shape.type === 'line' || shape.type === 'arrow') {
-    // Lines and arrows need to update their points
-    const newPoints = shape.points.map((point, index) => 
-      index % 2 === 0
-        ? point * scaleX
-        : point * scaleY
-    );
-    newShape.points = newPoints;
-
-  } else if (shape.type === 'triangle') {
-    // Triangles need to recalculate their points
-    newShape.points = [
-      newShape.x, newShape.y + newShape.height, // Bottom left
-      newShape.x + newShape.width / 2, newShape.y, // Top middle
-      newShape.x + newShape.width, newShape.y + newShape.height, // Bottom right
-    ];
-  }
-
-  // Update the shape with the new dimensions/points
-  onUpdateShape(newShape);
-};
-
-  
-
   const renderShape = () => {
+    // console.log(shape);
+
     switch (shape.type) {
-      case 'rect':
+      case "rect":
         return (
           <Rect
             ref={shapeRef}
@@ -144,12 +180,11 @@ const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
             onTransformEnd={handleTransformEnd}
           />
         );
-      case 'circle':
+      case "circle":
         return (
-          <Circle
+          <Ellipse
             ref={shapeRef}
             {...shape}
-            radius={shape.width / 2}
             draggable
             stroke="black"
             fill="red"
@@ -158,15 +193,11 @@ const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
             onTransformEnd={handleTransformEnd}
           />
         );
-      case 'triangle':
+      case "triangle":
         return (
           <Line
             ref={shapeRef}
-            points={[
-              shape.x, shape.y + shape.height, // Bottom left
-              shape.x + shape.width / 2, shape.y, // Top middle
-              shape.x + shape.width, shape.y + shape.height, // Bottom right
-            ]}
+            points={shape.points}
             closed
             stroke="black"
             fill="yellow"
@@ -176,27 +207,44 @@ const KonvaShape = ({ shape, isSelected, onSelect, onUpdateShape }) => {
             onTransformEnd={handleTransformEnd}
           />
         );
-      case 'line':
+      case "line":
         return (
           <Line
             ref={shapeRef}
             points={shape.points}
-            stroke="black"
+            stroke="blue"
+            strokeWidth={2}
             draggable
             onClick={onSelect}
             onDragEnd={handleDragEnd}
             onTransformEnd={handleTransformEnd}
           />
         );
-      case 'arrow':
+      case "arrow":
         return (
           <Arrow
             ref={shapeRef}
             points={shape.points}
-            stroke="black"
+            stroke="green"
+            fill="green"
             draggable
-            pointerLength={10}
-            pointerWidth={10}
+            onClick={onSelect}
+            onDragEnd={handleDragEnd}
+            onTransformEnd={handleTransformEnd}
+          />
+        );
+      case "diamond":
+        return (
+          <Path
+            ref={shapeRef}
+            data="M 50,0 L 100,50 L 50,100 L 0,50 Z" // Example diamond path
+            x={shape.x}
+            y={shape.y}
+            scaleX={shape.width / 100}
+            scaleY={shape.height / 100}
+            fill="pink"
+            stroke="purple"
+            draggable
             onClick={onSelect}
             onDragEnd={handleDragEnd}
             onTransformEnd={handleTransformEnd}
